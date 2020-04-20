@@ -16,9 +16,6 @@ import org.junit.Assert.*
 @RunWith(AndroidJUnit4::class)
 class ColoursInstrumentedTest {
 
-
-
-
     @Test
     fun InitialScreenShown() {
 

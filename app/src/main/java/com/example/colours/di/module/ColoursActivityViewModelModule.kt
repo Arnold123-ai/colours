@@ -2,7 +2,6 @@ package com.example.colours.di.module
 
 import androidx.lifecycle.ViewModelProvider
 import com.example.colours.com.BASE_URL
-import com.example.colours.random_colour_generator.RandomColourGenerator
 import com.example.colours.repository.online.OnlineWordClient
 import com.example.colours.repository.online.OnlineWordRepository
 import com.example.colours.view.ColoursActivity
@@ -27,13 +26,8 @@ class ColoursActivityViewModelModule(private val coloursActivity: ColoursActivit
     }
 
     @Provides
-    fun providesViewModelFactory(onlineRepo: OnlineWordRepository,randomColourGenerator: RandomColourGenerator) : ColoursActivityViewModelFactory {
-        return ColoursActivityViewModelFactory(onlineRepo,randomColourGenerator)
-    }
-
-    @Provides
-    fun providesRandomColourGenerator() : RandomColourGenerator {
-        return RandomColourGenerator()
+    fun providesViewModelFactory(onlineRepo: OnlineWordRepository) : ColoursActivityViewModelFactory {
+        return ColoursActivityViewModelFactory(onlineRepo)
     }
 
     @Provides
