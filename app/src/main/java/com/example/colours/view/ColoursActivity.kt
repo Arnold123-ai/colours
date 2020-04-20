@@ -1,11 +1,10 @@
 package com.example.colours.view
 
 import android.content.Context
-import android.opengl.Visibility
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.colours.R
@@ -19,6 +18,8 @@ import com.example.colours.view_model.ColoursActivityViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_colours.*
+import java.lang.Exception
+import java.lang.reflect.Type
 import javax.inject.Inject
 
 class ColoursActivity : AppCompatActivity() {
@@ -26,7 +27,6 @@ class ColoursActivity : AppCompatActivity() {
     @Inject
     lateinit var colourActivityViewModel: ColoursActivityViewModel
 
-    private val prefernces = getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +34,7 @@ class ColoursActivity : AppCompatActivity() {
 
         injectDependency().inject(this)
 
-
+        successful(loadData())
 
         colourActivityViewModel.loadingState.observe(this, Observer {
             when(it) {
@@ -49,17 +49,23 @@ class ColoursActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveData(listOfWords: ArrayList<ColourEntity>) {
+    private fun saveData(listOfWords: ArrayList<ColourEntity> ) {
+        val prefernces = getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
         val editor = prefernces.edit()
         val gson = Gson()
         val json = gson.toJson(listOfWords)
         editor.putString(SHARED_PREFERENCE_STRING,json)
+
         editor.apply()
     }
 
-    private fun loadData()  {
+    private fun loadData() : ArrayList<ColourEntity> {
+        val prefernces = getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
         val gson = Gson()
-        val json :String? = prefernces.getString(SHARED_PREFERENCE_STRING,null)
+        val json : String = prefernces.getString(SHARED_PREFERENCE_STRING, null)
+            ?: return arrayListOf()
+        val type: Type = object : TypeToken<List<ColourEntity>>() {}.type
+        return gson.fromJson(json,type)
     }
 
     private fun injectDependency() : ColoursActivityViewModelComponent {
@@ -73,16 +79,17 @@ class ColoursActivity : AppCompatActivity() {
         pb_loading.visibility = GONE
         rv_colours.visibility = GONE
         tv_errorMessage.visibility = VISIBLE
-
         tv_errorMessage.text = errorMessage
 
     }
 
     private fun successful(listOfWords: ArrayList<ColourEntity>) {
+        if (listOfWords.isEmpty()) colourActivityViewModel.getWords()
+
         pb_loading.visibility = GONE
         tv_errorMessage.visibility = GONE
         rv_colours.visibility = VISIBLE
-
+        saveData(listOfWords)
         setUpRecyclerView(listOfWords)
     }
 
